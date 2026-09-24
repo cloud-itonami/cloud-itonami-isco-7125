@@ -1,0 +1,34 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:physics` runs it.
+;;
+;; README "Robotics premise": a job-site scheduling/logistics coordination
+;; robot for glaziers (ISCO 7125) schedules the crew, logs materials usage
+;; and progress, and coordinates glazing supply orders; it never installs
+;; glass. Its physical work is delivering glass: rolling panes on an A-frame
+;; stillage to the opening, and taking a pane off the stillage with a vacuum
+;; lifter so the crew can set it.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isco-7125"
+ :cases
+ [{:id :glass-stillage-delivery
+   :kind :transport
+   :procedure "delivery robot rolls an A-frame stillage of glass panes 40 m along the floor slab to the opening; panes stand upright so the load's centre of mass is high; the braking deceleration (up to an emergency stop) is swept"
+   :params {:mass-kg 150.0 :distance-m 40.0 :v-max-mps 0.8 :a-max-mps2 0.4
+            :payload-kg 600.0 :drive-force-n 600.0 :crr 0.02
+            :cog-height-m 0.40 :support-half-length-m 0.40 :payload-cog-height-m 1.00}
+   :sweep {:param :brake-decel-mps2 :values [0.5 1.0 1.5 2.0 2.5 3.0]}
+   :quantity :min-tipover-margin
+   :limit {:min 0.6 :basis "estimate: glass is unforgiving of a stumble; keep 60 % of the static longitudinal stability margin in reserve"}
+   :boundary {:lo 0.3 :hi 4.0}}
+  {:id :vacuum-lifter-pane
+   :kind :manipulator
+   :procedure "arm with a vacuum lifter takes a single glazing pane off the stillage and presents it upright at the frame opening"
+   :params {:l1-m 0.70 :l2-m 0.60 :m1-kg 10.0 :m2-kg 7.0
+            :from [0.80 0.30] :to [0.50 1.10] :duration-s 4.0 :steps 800}
+   :sweep {:param :payload-kg :values [10.0 20.0 30.0 45.0 60.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 350.0 :basis "estimate: continuous shoulder torque of a ~30 kg-payload industrial arm class with a vacuum lifter"}
+   :boundary {:lo 1.0 :hi 150.0}}]}
