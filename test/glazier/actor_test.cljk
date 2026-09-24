@@ -1,5 +1,5 @@
 (ns glazier.actor-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [glazier.actor :as actor]
             [glazier.store :as store]))
 
